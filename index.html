@@ -23,7 +23,7 @@ h1{font-size:clamp(2.1rem,8vw,4rem);line-height:1.12;margin:16px 0}h2{font-size:
 .note{font-size:.86rem;color:#e7bed1}
 .letter{background:#fff4fa;color:#5b2441;border-radius:24px;padding:clamp(22px,5vw,44px);text-align:left;box-shadow:0 18px 42px #17051055;margin:26px 0}
 .letter h3{text-align:center;font-size:1.5rem;margin:0 0 18px}.letter p{font-size:1rem;line-height:1.85;margin:0 0 16px}.letter .sign{text-align:right;font-weight:700;margin-bottom:0}
-.hidden{display:none}footer{text-align:center;padding:14px 0 45px;color:#f2c2d9;font-size:.88rem}
+.music-toggle{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:15;border:1px solid #ffffff55;border-radius:999px;background:#ffb5d4;color:#4d1733;font-weight:750;padding:12px 16px;box-shadow:0 6px 22px #18051488;cursor:pointer}.music-toggle:focus-visible{outline:3px solid white;outline-offset:3px}.hidden{display:none}footer{text-align:center;padding:14px 0 45px;color:#f2c2d9;font-size:.88rem}
 .overlay{position:fixed;inset:0;background:#100710ee;z-index:20;display:none;align-items:center;justify-content:center;padding:48px 12px 22px}
 .overlay.open{display:flex}.overlay img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}.close{position:absolute;right:14px;top:12px;border:0;background:#ffffff22;color:white;border-radius:50%;font-size:28px;width:42px;height:42px;cursor:pointer}
 @media(min-width:650px){.gallery{gap:16px}.photo img{max-height:330px}.photo{min-height:170px}}
@@ -32,12 +32,14 @@ h1{font-size:clamp(2.1rem,8vw,4rem);line-height:1.12;margin:16px 0}h2{font-size:
 </style>
 </head>
 <body>
+<audio id="bgMusic" src="music.mp3" preload="none" loop></audio>
+<button class="music-toggle" id="musicToggle" type="button" onclick="toggleMusic()" aria-label="Увімкнути музику" aria-pressed="false">🎵 Увімкнути музику</button>
 <main>
 <section id="intro">
 <div class="heart" aria-hidden="true">❤️</div>
 <h1>З днем народження, моя Маринко!</h1>
 <p class="lead">Я підготував для тебе маленький сюрприз. Тут — наші моменти, мої почуття і все, що я хотів тобі сказати. 💕</p>
-<button class="btn" type="button" onclick="document.getElementById('gallery').scrollIntoView({behavior:'smooth'})">Відкрити сюрприз 💌</button>
+<button class="btn" type="button" onclick="openSurprise()">Відкрити сюрприз 💌</button>
 </section>
 <section id="gallery">
 <h2>Наші моменти 💞</h2>
@@ -73,6 +75,15 @@ h1{font-size:clamp(2.1rem,8vw,4rem);line-height:1.12;margin:16px 0}h2{font-size:
 </main>
 <div class="overlay" id="lightbox" role="dialog" aria-modal="true" aria-label="Перегляд фото" onclick="closePhoto()"><button class="close" type="button" aria-label="Закрити фото" onclick="closePhoto()">×</button><img id="full-photo" alt="Фото у повному розмірі" onclick="event.stopPropagation()"></div>
 <script>
+const bgMusic=document.getElementById('bgMusic');
+const musicToggle=document.getElementById('musicToggle');
+bgMusic.volume=0.2;
+function syncMusicButton(){const playing=!bgMusic.paused;musicToggle.textContent=playing?'🔊 Вимкнути музику':'🎵 Увімкнути музику';musicToggle.setAttribute('aria-label',musicToggle.textContent);musicToggle.setAttribute('aria-pressed',String(playing))}
+async function startMusic(){try{await bgMusic.play()}catch(err){console.info('Music requires a user gesture or could not load',err)}syncMusicButton()}
+function toggleMusic(){if(bgMusic.paused){startMusic()}else{bgMusic.pause();syncMusicButton()}}
+function openSurprise(){startMusic();document.getElementById('gallery').scrollIntoView({behavior:'smooth'})}
+bgMusic.addEventListener('play',syncMusicButton);
+bgMusic.addEventListener('pause',syncMusicButton);
 function openPhoto(src){document.getElementById('full-photo').src=src;document.getElementById('lightbox').classList.add('open');document.body.style.overflow='hidden'}
 function closePhoto(){document.getElementById('lightbox').classList.remove('open');document.body.style.overflow=''}
 function revealLetter(){const el=document.getElementById('letter-section');el.classList.remove('hidden');el.scrollIntoView({behavior:'smooth'});document.getElementById('reveal').textContent='Прочитати лист ще раз 💌'}
